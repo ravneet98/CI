@@ -1,0 +1,30 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '14.x'
+    displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+    npm run test
+  displayName: 'Install dependencies, build and run tests'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.Repository.LocalPath)/dist'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+  displayName: 'Archive artifacts'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    artifactName: 'nodejs-artifact'
+    targetPath: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+  displayName: 'Publish artifact'
+
